@@ -1,0 +1,134 @@
+  const order = await Cart.findOne({ user: req.currentUser.id });
+
+  let result;
+
+  if (!order) {
+    result = await Order.findOne({
+      user: req.currentUser.id,
+    });
+  } else if (order) {
+    const { items, user } = order;
+    result = new Order({
+      user,
+      items,
+    });
+    await result.save();
+  } else {
+    const error = appError.create(
+      message.productNotFound,
+      404,
+      httpStatusText.FAIL
+    );
+    return next(error);
+  }
+
+
+
+
+
+  const cart = Cart.findOne({ user: req.currentUser.id });
+  console.log(cart.user);
+
+  let newOrder;
+  if (cart) {
+    const { items, user } = cart;
+    newOrder = new Order({
+      user,
+      items,
+    });
+    await newOrder.save();
+  }
+
+  const order = Order.findOne({ user: req.currentUser.id });
+
+  if (!order) {
+    const error = appError.create(
+      message.productNotFound,
+      404,
+      httpStatusText.FAIL
+    );
+    return next(error);
+  }
+
+  return res.status(201).send({ status: httpStatusText.SUCCESS, order });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const cart = await Cart.findOne({ user: req.currentUser.id });
+  let order = await Order.findOne({
+    user: req.currentUser.id,
+  });
+
+  if (!order) {
+    const { items, user } = cart;
+    order = new Order({
+      user,
+      items,
+    });
+    await order.save();
+  }
+
+  if (!order.items) {
+    order = await Order.findOneAndUpdate(order, {
+      $set: { items: [cart.items, ...order.items] },
+      new: true,
+    });
+  }
+
+  return res.status(201).send({ status: httpStatusText.SUCCESS, order });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const { items } = req.body;
+
+  let cart = await Cart.findOne({ user: req.currentUser.id });
+
+  console.log(cart.items.includes(items));
+
+  if (!cart) {
+    cart = new Cart({
+      items,
+      user: req.currentUser.id,
+    });
+    await cart.save();
+  } else if (!cart.items.includes(items)) {
+    cart.items.push(req.body.items);
+    await cart.save();
+  }
+
+  return res.status(201).send({ status: httpStatusText.SUCCESS, cart });
